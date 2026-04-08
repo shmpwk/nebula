@@ -40,10 +40,11 @@ struct PacketMetadata
   bool did_scan_complete{false};
 };
 
-/// @brief Performance information about decode timings
+/// @brief Performance information about decoding and callback timings
 struct PerformanceCounters
 {
   uint64_t decode_time_ns{0};
+  uint64_t callback_time_ns{0};
 };
 
 struct PacketDecodeResult

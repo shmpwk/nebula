@@ -46,8 +46,36 @@ inline void check_pcds(
     EXPECT_FLOAT_EQ(p.z, p_ref.z);
 
     // Prevent thousands of outputs when point clouds do not align
-    ASSERT_TRUE(p.x == p_ref.x && p.y == p_ref.y && p.z == p_ref.z)
-      << "The point clouds are the same size, but at least one point is geometrically different.";
+    if (p.x != p_ref.x || p.y != p_ref.y || p.z != p_ref.z) {
+      return;
+    }
+  }
+}
+
+inline void check_pcds(
+  nebula::drivers::NebulaPointCloudPtr pp1, nebula::drivers::NebulaPointCloudPtr pp2)
+{
+  EXPECT_EQ(pp1->points.size(), pp2->points.size());
+  for (uint32_t i = 0; i < pp1->points.size(); i++) {
+    auto p1 = pp1->points[i];
+    auto p2 = pp2->points[i];
+    EXPECT_FLOAT_EQ(p1.x, p2.x);
+    EXPECT_FLOAT_EQ(p1.y, p2.y);
+    EXPECT_FLOAT_EQ(p1.z, p2.z);
+    EXPECT_FLOAT_EQ(p1.intensity, p2.intensity);
+    EXPECT_EQ(p1.channel, p2.channel);
+    EXPECT_FLOAT_EQ(p1.azimuth, p2.azimuth);
+    EXPECT_EQ(p1.return_type, p2.return_type);
+    EXPECT_DOUBLE_EQ(p1.time_stamp, p2.time_stamp);
+  }
+}
+
+inline void print_pcd(nebula::drivers::NebulaPointCloudPtr pp)
+{
+  for (auto p : pp->points) {
+    std::cout << "(" << p.x << ", " << p.y << "," << p.z << "): " << p.intensity << ", "
+              << p.channel << ", " << p.azimuth << ", " << p.return_type << ", " << p.time_stamp
+              << std::endl;
   }
 }
 

@@ -5,27 +5,19 @@ This script prepares a Zensical-compatible docs tree by:
 1. Copying source docs to an output directory
 2. Merging mkdoxy-generated API reference markdown
 3. Expanding {{ json_to_markdown(...) }} macros into GitHub-Flavored Markdown tables
-4. Rendering drawio diagrams as embedded mxgraph divs
-5. Generating a derived Zensical config with updated paths
+4. Generating a derived Zensical config with updated paths
 """
 
 import argparse
 import ast
-from html import escape
 import json
-import logging
 import os
 from pathlib import Path
 import re
 import shutil
 import sys
 
-from lxml import etree
-from mkdocs_drawio.plugin import DrawioPlugin
-from mkdocs_drawio.plugin import SUB_TEMPLATE as MXGRAPH_TEMPLATE
 from tabulate import tabulate
-
-LOGGER = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -427,13 +419,10 @@ def main() -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(md, target)
 
-    macros_rendered = 0
-    drawio_rendered = 0
+    rendered = 0
     for md in out_dir.rglob("*.md"):
         if render_macros_in_markdown_file(md):
-            macros_rendered += 1
-        if render_drawio_diagrams_in_markdown_file(md):
-            drawio_rendered += 1
+            rendered += 1
 
     docs_dir_in_config = os.path.relpath(out_dir, start=ROOT)
     site_url = (args.site_url or "").strip() or None
@@ -441,10 +430,7 @@ def main() -> int:
         config_src, config_out, docs_dir_in_config, args.site_dir, site_url
     )
 
-    print(
-        f"Prepared docs in {docs_dir_in_config} "
-        f"(rendered {macros_rendered} macro file(s), {drawio_rendered} drawio file(s))"
-    )
+    print(f"Prepared docs in {docs_dir_in_config} (rendered {rendered} file(s))")
     return 0
 
 

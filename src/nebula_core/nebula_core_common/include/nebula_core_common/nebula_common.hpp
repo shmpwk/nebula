@@ -506,25 +506,17 @@ PointCloud<PointXYZ> convert_point_xyzircaedt_to_point_xyz(
 /// @brief Converts degrees to radians
 /// @param radians
 /// @return degrees
-template <typename T>
-static inline std::enable_if_t<std::is_floating_point_v<T>, T> deg2rad(T degrees)
+static inline float deg2rad(double degrees)
 {
-  return degrees * static_cast<T>(M_PI / 180.0);
-}
-
-template <typename T>
-static inline std::enable_if_t<std::is_integral_v<T>, double> deg2rad(T degrees)
-{
-  return deg2rad<double>(static_cast<double>(degrees));
+  return degrees * M_PI / 180.0;
 }
 
 /// @brief Converts radians to degrees
 /// @param radians
 /// @return degrees
-template <typename T>
-static inline std::enable_if_t<std::is_floating_point_v<T>, T> rad2deg(T radians)
+static inline float rad2deg(double radians)
 {
-  return radians * static_cast<T>(180.0 / M_PI);
+  return radians * 180.0 / M_PI;
 }
 
 /// @brief Converts RPM to Hertz

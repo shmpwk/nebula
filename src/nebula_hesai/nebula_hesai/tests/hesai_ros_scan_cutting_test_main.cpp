@@ -25,7 +25,7 @@ namespace nebula::test
 const nebula::ros::HesaiRosDecoderTestParams g_test_configs[] = {
   {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 0.0, 0., 360., 0.3f, 200.f},
   {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 180.0, 0., 360., 0.3f, 200.f},
-  {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 91.0, 90., 270., 0.3f, 200.f},
+  {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 90.0, 90., 270., 0.3f, 200.f},
   {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 180.0, 90., 270., 0.3f, 200.f},
   {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 270.0, 90., 270., 0.3f, 200.f},
   {"Pandar64", "Dual", "Pandar64.csv", "64/all_points", "hesai", 0, 0.0, 270., 90., 0.3f, 200.f},
@@ -48,14 +48,20 @@ const nebula::ros::HesaiRosDecoderTestParams g_test_configs[] = {
    135., 1.f, 180.f},
 };
 
-// Validates that no points fall outside the defined FoV boundaries
-TEST_P(ScanCuttingTest, NoPointsOutsideFov)
+// Checks that there are never any points outside the defined FoV, and that there are points close
+// to the FoV boundaries
+TEST_P(ScanCuttingTest, FovAlignment)
 {
   int check_cnt = 0;
-  int skip_first = 2;
 
-  auto fov_min_rad = drivers::deg2rad(static_cast<float>(hesai_driver_->params_.fov_start));
-  auto fov_max_rad = drivers::deg2rad(static_cast<float>(hesai_driver_->params_.fov_end));
+  auto fov_min_rad = drivers::deg2rad(hesai_driver_->params_.fov_start);
+  auto fov_max_rad = drivers::deg2rad(hesai_driver_->params_.fov_end);
+  // The threshold near the FoV borders within which each channel has to have at least one point
+  auto near_threshold_rad = drivers::deg2rad(.3);
+
+  // Skip the first n clouds (because the recorded rosbags do not always contain full scans and the
+  // tests would thus fail)
+  int skip_first = 2;
 
   auto scan_callback = [&](uint64_t, uint64_t, nebula::drivers::NebulaPointCloudPtr pointcloud) {
     if (!pointcloud || skip_first-- > 0) return;
@@ -305,7 +311,6 @@ INSTANTIATE_TEST_SUITE_P(
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rcutils_logging_set_default_logger_level(RCUTILS_LOG_SEVERITY_WARN);
   ::testing::InitGoogleTest(&argc, argv);
 
   int result = RUN_ALL_TESTS();
